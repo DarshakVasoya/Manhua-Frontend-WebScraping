@@ -1,4 +1,5 @@
 import requests
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from bs4 import BeautifulSoup
 from mongodb_connection import get_mongo_client
 
@@ -163,27 +164,31 @@ def main():
     for page_num in range(start_page, 90):
         print(f"Scraping page {page_num}")
         manga_links = get_manga_links(page_num)
-        for link in manga_links:
-            try:
-                details = scrape_manga_details(link)
-                if details is None:
-                    continue
-                # Store each manga immediately after scraping
+        # Use ThreadPoolExecutor for parallel scraping
+        with ThreadPoolExecutor(max_workers=8) as executor:
+            future_to_link = {executor.submit(scrape_manga_details, link): link for link in manga_links}
+            for future in as_completed(future_to_link):
+                link = future_to_link[future]
                 try:
-                    collection.insert_one(details)
-                    print(f"Inserted manga: {details['name']} from {link}")
-                    # Store progress after successful insert
-                    progress_collection.update_one({"_id": "last_scraped"}, {"$set": {"url": link, "page": page_num}}, upsert=True)
+                    details = future.result()
+                    if details is None:
+                        continue
+                    # Store each manga immediately after scraping
+                    try:
+                        collection.insert_one(details)
+                        print(f"Inserted manga: {details['name']} from {link}")
+                        # Store progress after successful insert
+                        progress_collection.update_one({"_id": "last_scraped"}, {"$set": {"url": link, "page": page_num}}, upsert=True)
+                    except Exception as e:
+                        from pymongo.errors import BulkWriteError
+                        if isinstance(e, BulkWriteError):
+                            print(f"Bulk write error: {e.details}")
+                        else:
+                            print(f"Error inserting manga details: {e}")
+                    print(f"Scraped: {details['name']} from {link}")
                 except Exception as e:
-                    from pymongo.errors import BulkWriteError
-                    if isinstance(e, BulkWriteError):
-                        print(f"Bulk write error: {e.details}")
-                    else:
-                        print(f"Error inserting manga details: {e}")
-                print(f"Scraped: {details['name']} from {link}")
-            except Exception as e:
-                print(f"Error scraping {link}: {e}")
-                error_collection.update_one({"url": link}, {"$set": {"url": link, "error": str(e)}}, upsert=True)
+                    print(f"Error scraping {link}: {e}")
+                    error_collection.update_one({"url": link}, {"$set": {"url": link, "error": str(e)}}, upsert=True)
     print("Scraping complete.")
     client.close()
 
