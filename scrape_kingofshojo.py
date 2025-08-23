@@ -124,6 +124,14 @@ def scrape_manga_details(manga_url):
     for g in genre_tags:
         genres.append(g.text.strip())
 
+    # Parse posted_on to ISO format for updated_at
+    from datetime import datetime
+    updated_at = None
+    if posted_on:
+        try:
+            updated_at = datetime.strptime(posted_on, "%B %d, %Y")
+        except Exception:
+            updated_at = None
     return {
         "cover_image": cover_image,
         "name": name,
@@ -136,6 +144,7 @@ def scrape_manga_details(manga_url):
         "released": info.get("released"),
         "author": info.get("author"),
         "posted_on": posted_on,
+        "updated_at": updated_at,
         "views": views,
         "genres": genres,
         "url": manga_url,
