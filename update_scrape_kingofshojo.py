@@ -198,7 +198,7 @@ def create_new_manga_entries():
     total_updated = 0
     client = get_mongo_client()
     db = client.admin
-    collection = db["manhwa_backup"]
+    collection = db["manhwa"]
     page_num = 1
     consecutive_no_update = 0
     while True:
