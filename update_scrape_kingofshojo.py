@@ -103,13 +103,13 @@ def scrape_all_chapters_and_details(manga_url):
     for g in genre_tags:
         genres.append(g.text.strip())
     updated_at = None
-    if posted_on:
-        try:
-            updated_at = datetime.strptime(posted_on, "%B %d, %Y")
-        except Exception:
-            updated_at = datetime.now()
-    else:
-        updated_at = datetime.now()
+    # if posted_on:
+    #     try:
+    #         updated_at = datetime.strptime(posted_on, "%B %d, %Y")
+    #     except Exception:
+    #         updated_at = datetime.now()
+    # else:
+    updated_at = datetime.now()
     manga_details = {
         "cover_image": cover_image,
         "name": name,
@@ -250,8 +250,8 @@ def create_new_manga_entries():
                 else:
                     print(f"No update needed for: {url}")
                     consecutive_no_update += 1
-                    if consecutive_no_update >= 20:
-                        print("No update needed for 20 consecutive manga. Exiting early.")
+                    if consecutive_no_update >= 10:
+                        print("No update needed for 10 consecutive manga. Exiting early.")
                         client.close()
                         return
         page_num += 1
