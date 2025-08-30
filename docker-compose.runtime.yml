@@ -1,0 +1,15 @@
+services:
+  updater:
+    image: manhua-scraper:latest
+    env_file: .env
+    environment:
+      - TASK=updater
+      - RUN_CMD=python update_scrape_kingofshojo.py
+    restart: unless-stopped
+
+  ratings:
+    image: manhua-scraper:latest
+    env_file: .env
+    environment:
+      - TASK=ratings
+    restart: "no"

@@ -2,6 +2,10 @@ from datetime import datetime
 from bs4 import BeautifulSoup
 import requests
 from mongodb_connection import get_mongo_client
+import os
+
+MONGO_COLLECTION = os.getenv("MONGO_COLLECTION", "manhwa")
+
 
 def get_manga_links_and_latest_chapter(page_num):
     url = f"https://kingofshojo.com/manga/?page={page_num}&status=&type=&order=update"
@@ -198,7 +202,7 @@ def create_new_manga_entries():
     total_updated = 0
     client = get_mongo_client()
     db = client.admin
-    collection = db["manhwa"]
+    collection = db[MONGO_COLLECTION]
     page_num = 1
     consecutive_no_update = 0
     while True:

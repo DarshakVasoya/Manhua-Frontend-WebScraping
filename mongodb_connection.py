@@ -1,5 +1,9 @@
+import os
 from pymongo import MongoClient
 
 def get_mongo_client():
-    uri = "mongodb://darshak:DarshakVasoya1310%40@165.232.60.4:27017/admin?authSource=admin"
-    return MongoClient(uri)
+    uri = os.getenv("MONGO_URI")
+    if not uri:
+        raise RuntimeError("MONGO_URI is not set. Put it in .env or Docker env.")
+    return MongoClient(uri, connectTimeoutMS=20000, serverSelectionTimeoutMS=20000)
+

@@ -1,0 +1,4 @@
+set -euo pipefail
+set -a; [ -f .env.ratings ] && source .env.ratings || true; set +a
+source venv/bin/activate
+python set_gemini_ratings.py

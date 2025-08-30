@@ -1,0 +1,52 @@
+I’ll get you a quick, safe way to restart MongoDB and verify it’s healthy.
+
+Checklist:
+- Detect how MongoDB is running (system service or Docker)
+- Restart it
+- Verify status and logs
+- Validate connectivity
+
+System service (most common on Ubuntu):
+- Restart:
+```bash
+sudo systemctl restart mongod
+```
+- Check status:
+```bash
+sudo systemctl status mongod
+```
+- Recent logs (last 10 minutes):
+```bash
+sudo journalctl -u mongod --since "10 min ago" -n 200
+```
+- Ensure auto-start on boot (optional):
+```bash
+sudo systemctl enable mongod
+```
+
+If using Docker:
+- Find container:
+```bash
+docker ps | grep -i mongo
+```
+- Restart container:
+```bash
+docker restart <container_name_or_id>
+```
+- Check logs:
+```bash
+docker logs -n 200 <container_name_or_id>
+```
+
+Quick health checks:
+- Port listening:
+```bash
+ss -tulpn | grep 27017
+```
+- App connectivity (inside your venv):
+```bash
+source venv/bin/activate
+python -c "from mongodb_connection import get_mongo_client; print(get_mongo_client().admin.command('ping'))"
+```
+
+Want me to run the restart and checks for you here?

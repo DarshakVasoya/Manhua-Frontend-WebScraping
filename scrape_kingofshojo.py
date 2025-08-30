@@ -170,7 +170,7 @@ def main():
         match = re.search(r"page=(\d+)", last_progress["url"])
         if match:
             start_page = int(match.group(1))
-    for page_num in range(start_page, 90):
+    for page_num in range(start_page, 100):
         print(f"Scraping page {page_num}")
         manga_links = get_manga_links(page_num)
         # Use ThreadPoolExecutor for parallel scraping
